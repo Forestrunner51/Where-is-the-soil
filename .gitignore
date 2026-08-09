@@ -1,0 +1,152 @@
+# ---------------------------------------------------------------------------
+# Godot 4 (+ C#/.NET) — "Soil"
+# ---------------------------------------------------------------------------
+
+# Godot editor cache / imported asset cache. Never commit: machine-specific,
+# huge, and regenerated on first open.
+.godot/
+.import/
+/android/
+
+# Export output & build artifacts
+/build/
+/builds/
+/export/
+/exports/
+export_presets.cfg
+*.pck
+*.zip
+*.exe
+*.dmg
+*.app/
+*.apk
+*.aab
+*.x86_64
+*.wasm
+
+# Android/iOS signing material — must never reach a public remote
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.cer
+
+# ---------------------------------------------------------------------------
+# C# / .NET / Mono
+# ---------------------------------------------------------------------------
+.mono/
+mono_crash.*.json
+data_*/
+bin/
+obj/
+*.user
+*.userprefs
+*.suo
+*.csproj.user
+*.sln.DotSettings.user
+.vs/
+.idea/
+.vscode/
+*.swp
+
+# ---------------------------------------------------------------------------
+# OS junk
+# ---------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# 3D models & heavy project resources
+#
+# Binary assets bloat history permanently and break `git push` once a single
+# file exceeds GitHub's 100 MB hard limit (warning at 50 MB). Keep them out of
+# the repo, or track them with Git LFS instead:
+#     git lfs install && git lfs track "*.glb" && git add .gitattributes
+# then delete the matching line below so the file is no longer ignored.
+# ---------------------------------------------------------------------------
+
+# DCC source files (Blender, Maya, Max, ZBrush, Substance, ...)
+*.blend
+*.blend[0-9]*
+*.fbx
+*.ma
+*.mb
+*.max
+*.3ds
+*.c4d
+*.lxo
+*.ztl
+*.zpr
+*.spp
+*.sbs
+*.sbsar
+*.abc
+*.usd
+*.usda
+*.usdc
+*.usdz
+
+# Runtime 3D formats
+*.glb
+*.gltf
+*.obj
+*.mtl
+*.dae
+*.ply
+*.stl
+
+# Large textures / bakes
+*.psd
+*.psb
+*.exr
+*.hdr
+*.tga
+*.tiff
+*.tif
+*.dds
+*.ktx
+*.ktx2
+*.basis
+
+# Raw audio / video
+*.wav
+*.aif
+*.aiff
+*.flac
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Unimported raw asset staging area (keep source art here, outside the repo)
+/raw/
+/art_src/
+/_unimported/
+
+# Godot .import sidecars for ignored assets are useless without the asset
+*.glb.import
+*.gltf.import
+*.obj.import
+*.fbx.import
+*.exr.import
+*.tga.import
+*.tif.import
+*.tiff.import
+*.dds.import
+*.wav.import
+*.mp4.import
+*.mov.import
+
+# ---------------------------------------------------------------------------
+# Un-ignore specific committed assets here (small ones, or LFS-tracked ones).
+# Example:
+#   !assets/props/rock_lowpoly.glb
+#   !assets/props/rock_lowpoly.glb.import
+# ---------------------------------------------------------------------------
+!icon.svg
+!icon.svg.import
