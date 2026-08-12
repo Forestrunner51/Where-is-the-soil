@@ -1,0 +1,74 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" uid="uid://ct0lxcenq4vck" path="res://world/floor/floor.tscn" id="1_floor"]
+[ext_resource type="PackedScene" uid="uid://cfd83tkerus77" path="res://crops/potato/potato.tscn" id="2_potato"]
+[ext_resource type="PackedScene" path="res://actors/butcher/butcher.tscn" id="3_butcher"]
+[ext_resource type="PackedScene" path="res://world/props/fence/fence.tscn" id="4_fence"]
+[ext_resource type="PackedScene" path="res://world/props/shed/shed.tscn" id="5_shed"]
+[ext_resource type="PackedScene" path="res://world/props/well/well.tscn" id="6_well"]
+[ext_resource type="PackedScene" path="res://world/props/lamp/lamp_post.tscn" id="7_lamp"]
+
+[sub_resource type="BoxMesh" id="Mesh_tilled"]
+size = Vector3(16, 0.06, 10)
+
+[sub_resource type="StandardMaterial3D" id="Mat_tilled"]
+albedo_color = Color(0.12, 0.09, 0.07, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_path"]
+size = Vector3(3, 0.04, 22)
+
+[node name="Farm" type="Node3D"]
+
+[node name="Ground" parent="." instance=ExtResource("1_floor")]
+
+[node name="Fence" parent="." instance=ExtResource("4_fence")]
+
+[node name="TilledField" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -2)
+mesh = SubResource("Mesh_tilled")
+material_override = SubResource("Mat_tilled")
+
+[node name="Path" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 9)
+mesh = SubResource("Mesh_path")
+material_override = SubResource("Mat_tilled")
+
+[node name="Potato1" parent="." instance=ExtResource("2_potato")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -4)
+
+[node name="Potato2" parent="." instance=ExtResource("2_potato")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
+
+[node name="Potato3" parent="." instance=ExtResource("2_potato")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, -4)
+
+[node name="Potato4" parent="." instance=ExtResource("2_potato")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, 0)
+
+[node name="Potato5" parent="." instance=ExtResource("2_potato")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Potato6" parent="." instance=ExtResource("2_potato")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 0)
+
+[node name="Shed" parent="." instance=ExtResource("5_shed")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -10)
+
+[node name="Well" parent="." instance=ExtResource("6_well")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -10)
+
+[node name="Butcher" parent="." instance=ExtResource("3_butcher")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -6, 0.05, 13)
+
+[node name="LampField" parent="." instance=ExtResource("7_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -2)
+
+[node name="LampShed" parent="." instance=ExtResource("7_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -8)
+
+[node name="LampGate" parent="." instance=ExtResource("7_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0, 19)
+
+[node name="LampYard" parent="." instance=ExtResource("7_lamp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 8)

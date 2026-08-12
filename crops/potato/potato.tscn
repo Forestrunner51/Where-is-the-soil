@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cfd83tkerus77"]
 
+[ext_resource type="Script" uid="uid://bu53uhd3vc3og" path="res://crops/potato/Potato.cs" id="1_potato"]
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pkctj"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_pkctj"]
@@ -7,6 +9,7 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8g4km"]
 
 [node name="Node3D" type="StaticBody3D" unique_id=1628290168]
+script = ExtResource("1_potato")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=165473511]
 shape = SubResource("CapsuleShape3D_pkctj")

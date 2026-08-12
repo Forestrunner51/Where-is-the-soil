@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/menus/LoginScreen.cs" id="1_login"]
+
+[node name="LoginScreen" type="Control"]
+layout_mode = 3
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_login")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.035, 0.03, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(340, 0)
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Layout"]
+text = "SOIL"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/Layout"]
+text = "Who works this land?"
+horizontal_alignment = 1
+
+[node name="NameField" type="LineEdit" parent="Center/Layout"]
+placeholder_text = "your name"
+alignment = 1
+max_length = 24
+
+[node name="Hint" type="Label" parent="Center/Layout"]
+text = ""
+horizontal_alignment = 1
+
+[node name="Continue" type="Button" parent="Center/Layout"]
+text = "Continue"

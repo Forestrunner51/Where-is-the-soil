@@ -1,0 +1,52 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://actors/butcher/Butcher.cs" id="1_butcher"]
+
+[sub_resource type="BoxShape3D" id="Shape_counter"]
+size = Vector3(2, 1, 0.8)
+
+[sub_resource type="BoxMesh" id="Mesh_counter"]
+size = Vector3(2, 1, 0.8)
+
+[sub_resource type="BoxMesh" id="Mesh_awning"]
+size = Vector3(2.6, 0.08, 1.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_post"]
+top_radius = 0.06
+bottom_radius = 0.06
+height = 2.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.27, 0.19, 0.14, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_awning"]
+albedo_color = Color(0.42, 0.11, 0.11, 1)
+roughness = 0.85
+
+[node name="Butcher" type="StaticBody3D"]
+script = ExtResource("1_butcher")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("Shape_counter")
+
+[node name="Counter" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("Mesh_counter")
+material_override = SubResource("Mat_wood")
+
+[node name="PostLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 1.1, 0)
+mesh = SubResource("Mesh_post")
+material_override = SubResource("Mat_wood")
+
+[node name="PostRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 1.1, 0)
+mesh = SubResource("Mesh_post")
+material_override = SubResource("Mat_wood")
+
+[node name="Awning" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+mesh = SubResource("Mesh_awning")
+material_override = SubResource("Mat_awning")

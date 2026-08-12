@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/shop/ShopUi.cs" id="1_shop"]
+
+[node name="ShopUi" type="CanvasLayer"]
+layer = 2
+script = ExtResource("1_shop")
+
+[node name="Panel" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="VBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/Layout"]
+text = "THE BUTCHER"
+horizontal_alignment = 1
+
+[node name="Gold" type="Label" parent="Panel/Layout"]
+text = "Gold: 0"
+horizontal_alignment = 1
+
+[node name="BuyRaw" type="Button" parent="Panel/Layout"]
+text = "Buy Raw meat"
+
+[node name="BuyCured" type="Button" parent="Panel/Layout"]
+text = "Buy Cured meat"
+
+[node name="SellPotato" type="Button" parent="Panel/Layout"]
+text = "Sell Potato"
+
+[node name="Message" type="Label" parent="Panel/Layout"]
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Close" type="Button" parent="Panel/Layout"]
+text = "Leave  [Esc]"
