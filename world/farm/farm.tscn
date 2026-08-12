@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://world/props/shed/shed.tscn" id="5_shed"]
 [ext_resource type="PackedScene" path="res://world/props/well/well.tscn" id="6_well"]
 [ext_resource type="PackedScene" path="res://world/props/lamp/lamp_post.tscn" id="7_lamp"]
+[ext_resource type="PackedScene" path="res://world/props/bed/bed.tscn" id="8_bed"]
 
 [sub_resource type="BoxMesh" id="Mesh_tilled"]
 size = Vector3(16, 0.06, 10)
@@ -54,6 +55,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 0)
 
 [node name="Shed" parent="." instance=ExtResource("5_shed")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -10)
+
+[node name="Bed" parent="." instance=ExtResource("8_bed")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -6.4)
 
 [node name="Well" parent="." instance=ExtResource("6_well")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -10)

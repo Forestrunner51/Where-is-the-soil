@@ -32,7 +32,10 @@ public static class ItemDatabase
 		DisplayName = "Potato",
 		MaxStack = 20,
 		FeedValue = 0.0f,
-		Price = -12, // negative: the butcher pays you for these
+		// Negative: the butcher pays you. 15 against 24g of feed per harvest cycle
+		// leaves a thin honest margin, so corrupting a crop is a choice, not the
+		// only way to stay solvent.
+		Price = -15,
 		Description = "Heavier than it looks.",
 	};
 

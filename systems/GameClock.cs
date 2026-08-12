@@ -24,6 +24,37 @@ public partial class GameClock : Node
 
 	private float _elapsed;
 
+	/// <summary>
+	/// Skips straight through the night to dawn. The night still resolves in
+	/// full — you just don't get to watch it happen.
+	/// </summary>
+	public void SleepThroughNight()
+	{
+		if (!IsNight)
+		{
+			IsNight = true;
+			GD.Print($"--- Night falls on day {Day} ---");
+			EmitSignal(SignalName.NightFell, Day);
+		}
+
+		IsNight = false;
+		Day++;
+		_elapsed = 0.0f;
+		PhaseProgress = 0.0f;
+
+		GD.Print($"--- Day {Day} ---");
+		EmitSignal(SignalName.DayBroke, Day);
+	}
+
+	/// <summary>Restores a saved day, at morning.</summary>
+	public void SetDay(int day)
+	{
+		Day = Mathf.Max(1, day);
+		IsNight = false;
+		_elapsed = 0.0f;
+		PhaseProgress = 0.0f;
+	}
+
 	/// <summary>Back to the morning of day one. Called when a new run starts.</summary>
 	public void Reset()
 	{

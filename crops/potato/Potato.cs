@@ -24,6 +24,8 @@ public partial class Potato : StaticBody3D, IInteractable
 	private int _timesFed;
 	private MeshInstance3D _mesh;
 	private StandardMaterial3D _material;
+	private float _baseScale = 1.0f;
+	private float _pulse;
 
 	/// <summary>0 = healthy, 1 = awake.</summary>
 	public float Corruption { get; private set; }
@@ -74,6 +76,8 @@ public partial class Potato : StaticBody3D, IInteractable
 		// resource is shared between every potato instance.
 		_material = new StandardMaterial3D { AlbedoColor = DryColor };
 		_mesh.MaterialOverride = _material;
+
+		GetNode<SaveGame>("/root/SaveGame").ApplyToCrop(this);
 	}
 
 	public void Interact(Player player)
@@ -83,9 +87,10 @@ public partial class Potato : StaticBody3D, IInteractable
 			return;
 		}
 
-		if (IsFullyGrown)
+		// If the harvest can't fit, fall through to feeding — otherwise a full
+		// inventory would silently leave the plot unfed and cost a villager.
+		if (IsFullyGrown && Harvest(player))
 		{
-			Harvest(player);
 			return;
 		}
 
@@ -120,7 +125,7 @@ public partial class Potato : StaticBody3D, IInteractable
 	/// Pulls the crop and resets it to seed. Corruption stays in the soil — the
 	/// plot remembers, so a bad plot keeps demanding meat forever.
 	/// </summary>
-	private void Harvest(Player player)
+	private bool Harvest(Player player)
 	{
 		// The temptation: a corrupted crop pays better.
 		int amount = Yield + (int)(CorruptBonusYield * Corruption);
@@ -130,13 +135,14 @@ public partial class Potato : StaticBody3D, IInteractable
 		{
 			LastRefusal = "No room to carry it.";
 			GD.Print(LastRefusal);
-			return;
+			return false;
 		}
 
 		LastRefusal = null;
 		_timesFed = 0;
 		GD.Print($"Harvested {amount - leftover} potato(es) from {Name}.");
 		Refresh();
+		return true;
 	}
 
 	/// <summary>
@@ -151,6 +157,27 @@ public partial class Potato : StaticBody3D, IInteractable
 		}
 
 		Corruption = Mathf.Min(1.0f, Corruption + NeglectCorruption * corruptionMultiplier);
+
+		if (Corruption >= 1.0f)
+		{
+			Awaken();
+		}
+
+		Refresh();
+	}
+
+	/// <summary>
+	/// Corruption forced on this crop from outside — a beast working the rows.
+	/// Unlike neglect, feeding it that day does not prevent this.
+	/// </summary>
+	public void Tend(float amount)
+	{
+		if (IsAwake)
+		{
+			return;
+		}
+
+		Corruption = Mathf.Min(1.0f, Corruption + amount);
 
 		if (Corruption >= 1.0f)
 		{
@@ -201,7 +228,37 @@ public partial class Potato : StaticBody3D, IInteractable
 		_material.AlbedoColor = healthy.Lerp(CorruptColor, Corruption);
 
 		// Scale the mesh, not the body — scaling a physics body upsets Jolt.
-		float size = Mathf.Lerp(1.0f, 1.5f, growth) + (IsAwake ? 1.0f : Corruption * 0.4f);
-		_mesh.Scale = Vector3.One * size;
+		_baseScale = Mathf.Lerp(1.0f, 1.5f, growth) + (IsAwake ? 1.0f : Corruption * 0.4f);
+		_mesh.Scale = Vector3.One * _baseScale;
 	}
+
+	public override void _Process(double delta)
+	{
+		// Only awake things breathe.
+		if (!IsAwake || _mesh == null)
+		{
+			return;
+		}
+
+		_pulse += (float)delta;
+		_mesh.Scale = Vector3.One * (_baseScale * (1.0f + Mathf.Sin(_pulse * 1.6f) * 0.05f));
+	}
+
+	/// <summary>Restores a crop from a save. Called before the first night.</summary>
+	public void LoadState(int timesFed, float corruption, bool awake, bool fedTonight)
+	{
+		_timesFed = timesFed;
+		Corruption = Mathf.Clamp(corruption, 0.0f, 1.0f);
+		FedTonight = fedTonight;
+
+		if (awake && !IsAwake)
+		{
+			IsAwake = true;
+			RemoveFromGroup("interactable");
+		}
+
+		Refresh();
+	}
+
+	public int TimesFed => _timesFed;
 }

@@ -23,6 +23,12 @@ public partial class Inventory : Node
 
 	public IReadOnlyList<ItemStack> Stacks => _stacks;
 
+	public void Clear()
+	{
+		_stacks.Clear();
+		EmitSignal(SignalName.Changed);
+	}
+
 	public int CountOf(string itemId) =>
 		_stacks.Where(s => s.Item.Id == itemId).Sum(s => s.Count);
 

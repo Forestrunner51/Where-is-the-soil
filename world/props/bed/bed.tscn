@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://world/props/bed/Bed.cs" id="1_bed"]
+
+[sub_resource type="BoxShape3D" id="Shape_bed"]
+size = Vector3(1.4, 0.7, 2.4)
+
+[sub_resource type="BoxMesh" id="Mesh_frame"]
+size = Vector3(1.4, 0.35, 2.4)
+
+[sub_resource type="BoxMesh" id="Mesh_mattress"]
+size = Vector3(1.3, 0.25, 2.2)
+
+[sub_resource type="BoxMesh" id="Mesh_pillow"]
+size = Vector3(0.9, 0.16, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_frame"]
+albedo_color = Color(0.22, 0.16, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_cloth"]
+albedo_color = Color(0.44, 0.42, 0.38, 1)
+roughness = 1.0
+
+[node name="Bed" type="StaticBody3D"]
+script = ExtResource("1_bed")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+shape = SubResource("Shape_bed")
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.175, 0)
+mesh = SubResource("Mesh_frame")
+material_override = SubResource("Mat_frame")
+
+[node name="Mattress" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47, 0)
+mesh = SubResource("Mesh_mattress")
+material_override = SubResource("Mat_cloth")
+
+[node name="Pillow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, -0.9)
+mesh = SubResource("Mesh_pillow")
+material_override = SubResource("Mat_cloth")

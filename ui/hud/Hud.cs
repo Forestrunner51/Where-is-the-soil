@@ -14,6 +14,9 @@ public partial class Hud : CanvasLayer
 	private Village _village;
 	private Player _player;
 
+	/// <summary>Seconds left showing the night's news.</summary>
+	private float _noticeTimer;
+
 	public override void _Ready()
 	{
 		_status = GetNode<Label>("Status");
@@ -22,6 +25,15 @@ public partial class Hud : CanvasLayer
 
 		_clock = GetNode<GameClock>("/root/GameClock");
 		_village = GetNode<Village>("/root/Village");
+
+		// Without this the player never learns anyone died — it was console-only.
+		_village.VillagerConsumed += OnVillagerConsumed;
+	}
+
+	private void OnVillagerConsumed(string villagerName, int remaining)
+	{
+		_prompt.Text = $"In the night, the soil took {villagerName}.";
+		_noticeTimer = 6.0f;
 	}
 
 	public override void _Process(double delta)
@@ -41,6 +53,13 @@ public partial class Hud : CanvasLayer
 		}
 
 		_inventory.Text = _player.Inventory.Summary();
+
+		// A death notice outranks the interact prompt while it is up.
+		if (_noticeTimer > 0.0f)
+		{
+			_noticeTimer -= (float)delta;
+			return;
+		}
 
 		IInteractable target = _player.FindNearestInteractable();
 		if (target == null)

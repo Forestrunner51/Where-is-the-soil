@@ -1,0 +1,51 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/menus/EndingScreen.cs" id="1_ending"]
+
+[node name="EndingScreen" type="Control"]
+layout_mode = 3
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ending")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.025, 0.022, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(460, 0)
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/Layout"]
+text = "THE TOWN IS EMPTY"
+horizontal_alignment = 1
+
+[node name="Body" type="Label" parent="Center/Layout"]
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Epitaph" type="Label" parent="Center/Layout"]
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="Center/Layout"]
+custom_minimum_size = Vector2(0, 20)
+
+[node name="MainMenu" type="Button" parent="Center/Layout"]
+text = "Main menu"
+
+[node name="Quit" type="Button" parent="Center/Layout"]
+text = "Quit"

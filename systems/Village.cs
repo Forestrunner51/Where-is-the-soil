@@ -110,6 +110,15 @@ public partial class Village : Node
 
 	public bool IsAlive(string id) => _villagers.Any(v => v.Id == id);
 
+	public string[] SurvivorNames() => _villagers.Select(v => v.Name).ToArray();
+
+	/// <summary>Restores a saved population: everyone not named here was already taken.</summary>
+	public void KeepOnly(ICollection<string> names)
+	{
+		Reset();
+		_villagers.RemoveAll(v => !names.Contains(v.Name));
+	}
+
 	/// <summary>
 	/// Takes one resident. Returns them, or null if the town is already empty.
 	/// </summary>

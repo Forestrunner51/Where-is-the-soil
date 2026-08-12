@@ -3,6 +3,10 @@ using Godot;
 public partial class Player : CharacterBody3D
 {
 	[Export] public float Speed = 5.0f;
+
+	/// <summary>How much faster Shift makes you. The farm is 60 m across.</summary>
+	[Export] public float SprintMultiplier = 1.8f;
+
 	[Export] public float JumpVelocity = 4.5f;
 
 	/// <summary>How close you must be to an interactable to use it, in metres.</summary>
@@ -51,7 +55,13 @@ public partial class Player : CharacterBody3D
 		AddChild(Inventory);
 		Inventory.Add(ItemDatabase.RawMeat, StartingMeat);
 		Gold = StartingGold;
+
+		// A loaded run overwrites the fresh-start kit.
+		GetNode<SaveGame>("/root/SaveGame").ApplyToPlayer(this);
 	}
+
+	/// <summary>Restores saved gold, bypassing the spend/earn path.</summary>
+	public void LoadGold(int amount) => Gold = amount;
 
 	public override void _UnhandledInput(InputEvent @event)
 	{
@@ -135,13 +145,17 @@ public partial class Player : CharacterBody3D
 		// Rotate the raw input into the direction the body is facing.
 		Vector3 direction = (Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
 
+		bool sprinting = !UiOpen && Input.IsActionPressed("sprint");
+		float speed = sprinting ? Speed * SprintMultiplier : Speed;
+
 		if (direction != Vector3.Zero)
 		{
-			velocity.X = direction.X * Speed;
-			velocity.Z = direction.Z * Speed;
+			velocity.X = direction.X * speed;
+			velocity.Z = direction.Z * speed;
 		}
 		else
 		{
+			// Decelerate at the base rate so letting go of Shift doesn't slide.
 			velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
 			velocity.Z = Mathf.MoveToward(Velocity.Z, 0, Speed);
 		}
