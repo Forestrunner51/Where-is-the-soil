@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene format=3 uid="uid://b15q686ci3qym"]
 
 [ext_resource type="PackedScene" uid="uid://ct0lxcenq4vck" path="res://world/floor/floor.tscn" id="1_floor"]
 [ext_resource type="PackedScene" uid="uid://cfd83tkerus77" path="res://crops/potato/potato.tscn" id="2_potato"]
@@ -9,70 +9,69 @@
 [ext_resource type="PackedScene" path="res://world/props/lamp/lamp_post.tscn" id="7_lamp"]
 [ext_resource type="PackedScene" path="res://world/props/bed/bed.tscn" id="8_bed"]
 
-[sub_resource type="BoxMesh" id="Mesh_tilled"]
-size = Vector3(16, 0.06, 10)
-
 [sub_resource type="StandardMaterial3D" id="Mat_tilled"]
 albedo_color = Color(0.12, 0.09, 0.07, 1)
-roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_tilled"]
+size = Vector3(16, 0.06, 10)
 
 [sub_resource type="BoxMesh" id="Mesh_path"]
 size = Vector3(3, 0.04, 22)
 
-[node name="Farm" type="Node3D"]
+[node name="Farm" type="Node3D" unique_id=1115423482]
 
-[node name="Ground" parent="." instance=ExtResource("1_floor")]
+[node name="Ground" parent="." unique_id=641327423 instance=ExtResource("1_floor")]
 
-[node name="Fence" parent="." instance=ExtResource("4_fence")]
+[node name="Fence" parent="." unique_id=1721070773 instance=ExtResource("4_fence")]
 
-[node name="TilledField" type="MeshInstance3D" parent="."]
+[node name="TilledField" type="MeshInstance3D" parent="." unique_id=1257188352]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -2)
+material_override = SubResource("Mat_tilled")
 mesh = SubResource("Mesh_tilled")
-material_override = SubResource("Mat_tilled")
 
-[node name="Path" type="MeshInstance3D" parent="."]
+[node name="Path" type="MeshInstance3D" parent="." unique_id=568430985]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 9)
-mesh = SubResource("Mesh_path")
 material_override = SubResource("Mat_tilled")
+mesh = SubResource("Mesh_path")
 
-[node name="Potato1" parent="." instance=ExtResource("2_potato")]
+[node name="Potato1" parent="." unique_id=296935422 instance=ExtResource("2_potato")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -4)
 
-[node name="Potato2" parent="." instance=ExtResource("2_potato")]
+[node name="Potato2" parent="." unique_id=230266077 instance=ExtResource("2_potato")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -4)
 
-[node name="Potato3" parent="." instance=ExtResource("2_potato")]
+[node name="Potato3" parent="." unique_id=858176586 instance=ExtResource("2_potato")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, -4)
 
-[node name="Potato4" parent="." instance=ExtResource("2_potato")]
+[node name="Potato4" parent="." unique_id=150679237 instance=ExtResource("2_potato")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, 0)
 
-[node name="Potato5" parent="." instance=ExtResource("2_potato")]
+[node name="Potato5" parent="." unique_id=135550711 instance=ExtResource("2_potato")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="Potato6" parent="." instance=ExtResource("2_potato")]
+[node name="Potato6" parent="." unique_id=430542984 instance=ExtResource("2_potato")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 0)
 
-[node name="Shed" parent="." instance=ExtResource("5_shed")]
+[node name="Shed" parent="." unique_id=1339263984 instance=ExtResource("5_shed")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -10)
 
-[node name="Bed" parent="." instance=ExtResource("8_bed")]
+[node name="Bed" parent="." unique_id=1323813865 instance=ExtResource("8_bed")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -6.4)
 
-[node name="Well" parent="." instance=ExtResource("6_well")]
+[node name="Well" parent="." unique_id=1215347132 instance=ExtResource("6_well")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -10)
 
-[node name="Butcher" parent="." instance=ExtResource("3_butcher")]
+[node name="Butcher" parent="." unique_id=430718416 instance=ExtResource("3_butcher")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -6, 0.05, 13)
 
-[node name="LampField" parent="." instance=ExtResource("7_lamp")]
+[node name="LampField" parent="." unique_id=1237732901 instance=ExtResource("7_lamp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -2)
 
-[node name="LampShed" parent="." instance=ExtResource("7_lamp")]
+[node name="LampShed" parent="." unique_id=167980082 instance=ExtResource("7_lamp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, -8)
 
-[node name="LampGate" parent="." instance=ExtResource("7_lamp")]
+[node name="LampGate" parent="." unique_id=186557864 instance=ExtResource("7_lamp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0, 19)
 
-[node name="LampYard" parent="." instance=ExtResource("7_lamp")]
+[node name="LampYard" parent="." unique_id=256231255 instance=ExtResource("7_lamp")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 8)

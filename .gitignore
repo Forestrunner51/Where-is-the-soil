@@ -150,3 +150,10 @@ desktop.ini
 # ---------------------------------------------------------------------------
 !icon.svg
 !icon.svg.import
+
+# Game audio is small, committed source — it must survive the *.wav rule above.
+!/audio/
+!/audio/**/*.wav
+!/audio/**/*.wav.import
+!/audio/**/*.ogg
+!/audio/**/*.ogg.import

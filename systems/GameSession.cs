@@ -38,6 +38,7 @@ public partial class GameSession : Node
 
 		_ending = false;
 		GetTree().Paused = false;
+		GetNode<GameClock>("/root/GameClock").Running = true;
 		GetTree().ChangeSceneToFile(GameScene);
 	}
 
@@ -51,6 +52,7 @@ public partial class GameSession : Node
 
 		_ending = false;
 		GetTree().Paused = false;
+		GetNode<GameClock>("/root/GameClock").Running = true;
 		GetTree().ChangeSceneToFile(GameScene);
 		return true;
 	}
@@ -70,6 +72,7 @@ public partial class GameSession : Node
 		GetNode<SaveGame>("/root/SaveGame").Delete();
 
 		GetTree().Paused = false;
+		GetNode<GameClock>("/root/GameClock").Running = false;
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		GetTree().ChangeSceneToFile(EndingScene);
 	}
@@ -77,6 +80,7 @@ public partial class GameSession : Node
 	public void GoToMainMenu()
 	{
 		GetTree().Paused = false;
+		GetNode<GameClock>("/root/GameClock").Running = false;
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		GetTree().ChangeSceneToFile(MenuScene);
 	}
@@ -84,6 +88,7 @@ public partial class GameSession : Node
 	public void GoToLogin()
 	{
 		GetTree().Paused = false;
+		GetNode<GameClock>("/root/GameClock").Running = false;
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		GetTree().ChangeSceneToFile(LoginScene);
 	}

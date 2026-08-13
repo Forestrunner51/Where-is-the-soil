@@ -2,11 +2,13 @@ using Godot;
 
 /// <summary>
 /// The butcher's menu. Buying and selling both run through <see cref="ItemData.Price"/>:
-/// positive means he charges you, negative means he pays.
+/// positive means he charges you, negative means he pays. Stock is held by the
+/// <see cref="Butcher"/> so it survives closing and reopening the menu.
 /// </summary>
 public partial class ShopUi : CanvasLayer
 {
 	private Player _player;
+	private Butcher _butcher;
 	private Village _village;
 
 	private Label _gold;
@@ -14,6 +16,7 @@ public partial class ShopUi : CanvasLayer
 	private Button _buyRaw;
 	private Button _buyCured;
 	private Button _sellPotato;
+	private Button _sellCorrupt;
 	private Button _close;
 
 	public bool IsOpen => Visible;
@@ -29,19 +32,22 @@ public partial class ShopUi : CanvasLayer
 		_buyRaw = GetNode<Button>("Panel/Layout/BuyRaw");
 		_buyCured = GetNode<Button>("Panel/Layout/BuyCured");
 		_sellPotato = GetNode<Button>("Panel/Layout/SellPotato");
+		_sellCorrupt = GetNode<Button>("Panel/Layout/SellCorrupt");
 		_close = GetNode<Button>("Panel/Layout/Close");
 
 		_buyRaw.Pressed += () => Buy(ItemDatabase.RawMeat);
 		_buyCured.Pressed += () => Buy(ItemDatabase.CuredMeat);
 		_sellPotato.Pressed += () => Sell(ItemDatabase.Potato);
+		_sellCorrupt.Pressed += () => Sell(ItemDatabase.CorruptPotato);
 		_close.Pressed += Close;
 
 		Visible = false;
 	}
 
-	public void Open(Player player)
+	public void Open(Player player, Butcher butcher)
 	{
 		_player = player;
+		_butcher = butcher;
 		_player.UiOpen = true;
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		Visible = true;
@@ -87,22 +93,29 @@ public partial class ShopUi : CanvasLayer
 
 		return _village.Population <= 4
 			? "He does not ask how the crop is doing."
-			: "\"Fresh in this morning.\"";
+			: "\"This is all that came in. It has to last you.\"";
 	}
 
 	private void Buy(ItemData item)
 	{
+		if (!_butcher.TryTakeStock(item.Id))
+		{
+			_message.Text = "\"That's all I have today.\"";
+			return;
+		}
+
 		if (!_player.TrySpend(item.Price))
 		{
+			_butcher.ReturnStock(item.Id);
 			_message.Text = "You cannot afford that.";
 			return;
 		}
 
-		int leftover = _player.Inventory.Add(item);
-		if (leftover > 0)
+		if (_player.Inventory.Add(item) > 0)
 		{
-			// Refund rather than silently eating the coin.
+			// Refund both sides rather than silently eating the coin.
 			_player.AddGold(item.Price);
+			_butcher.ReturnStock(item.Id);
 			_message.Text = "You have no room.";
 			return;
 		}
@@ -127,15 +140,30 @@ public partial class ShopUi : CanvasLayer
 		}
 
 		_player.AddGold(payout);
-		_message.Text = $"Sold {item.DisplayName} for {payout}g.";
+
+		_message.Text = item.Id == ItemDatabase.CorruptPotato.Id
+			? $"He weighs it, pays {payout}g, and says nothing."
+			: $"Sold {item.DisplayName} for {payout}g.";
+
 		Refresh();
 	}
 
 	private void Refresh()
 	{
-		_gold.Text = $"Gold: {_player.Gold}     Potatoes: {_player.Inventory.CountOf(ItemDatabase.Potato.Id)}";
-		_buyRaw.Text = $"Buy {ItemDatabase.RawMeat.DisplayName}  —  {ItemDatabase.RawMeat.Price}g";
-		_buyCured.Text = $"Buy {ItemDatabase.CuredMeat.DisplayName}  —  {ItemDatabase.CuredMeat.Price}g";
-		_sellPotato.Text = $"Sell {ItemDatabase.Potato.DisplayName}  —  {-ItemDatabase.Potato.Price}g";
+		int clean = _player.Inventory.CountOf(ItemDatabase.Potato.Id);
+		int dark = _player.Inventory.CountOf(ItemDatabase.CorruptPotato.Id);
+
+		_gold.Text = $"Gold: {_player.Gold}     Potatoes: {clean}     Dark: {dark}";
+
+		int rawLeft = _butcher.StockOf(ItemDatabase.RawMeat.Id);
+		int curedLeft = _butcher.StockOf(ItemDatabase.CuredMeat.Id);
+
+		_buyRaw.Text = $"Buy {ItemDatabase.RawMeat.DisplayName} — {ItemDatabase.RawMeat.Price}g  ({rawLeft} left)";
+		_buyCured.Text = $"Buy {ItemDatabase.CuredMeat.DisplayName} — {ItemDatabase.CuredMeat.Price}g  ({curedLeft} left)";
+		_buyRaw.Disabled = rawLeft <= 0;
+		_buyCured.Disabled = curedLeft <= 0;
+
+		_sellPotato.Text = $"Sell {ItemDatabase.Potato.DisplayName} — {-ItemDatabase.Potato.Price}g";
+		_sellCorrupt.Text = $"Sell {ItemDatabase.CorruptPotato.DisplayName} — {-ItemDatabase.CorruptPotato.Price}g";
 	}
 }

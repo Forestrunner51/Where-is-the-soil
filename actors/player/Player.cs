@@ -20,8 +20,17 @@ public partial class Player : CharacterBody3D
 
 	[Export] public int StartingGold = 40;
 
+	/// <summary>Seconds between footfalls at walking pace.</summary>
+	[Export] public float StepInterval = 0.52f;
+
 	private Camera3D _camera;
 	private GameSettings _settings;
+
+	private AudioStreamPlayer _stepPlayer;
+	private AudioStreamPlayer _stingPlayer;
+	private AudioStream[] _steps;
+	private float _stepTimer;
+	private int _stepIndex;
 
 	public Inventory Inventory { get; private set; }
 
@@ -51,6 +60,10 @@ public partial class Player : CharacterBody3D
 
 		AddToGroup("player");
 
+		// The clock runs whenever someone is actually in the field — this also
+		// makes running world/main.tscn directly (F6) behave.
+		GetNode<GameClock>("/root/GameClock").Running = true;
+
 		Inventory = new Inventory { Name = "Inventory" };
 		AddChild(Inventory);
 		Inventory.Add(ItemDatabase.RawMeat, StartingMeat);
@@ -58,10 +71,89 @@ public partial class Player : CharacterBody3D
 
 		// A loaded run overwrites the fresh-start kit.
 		GetNode<SaveGame>("/root/SaveGame").ApplyToPlayer(this);
+
+		SetUpAudio();
+	}
+
+	private void SetUpAudio()
+	{
+		_steps = new AudioStream[]
+		{
+			GD.Load<AudioStream>("res://audio/step_1.wav"),
+			GD.Load<AudioStream>("res://audio/step_2.wav"),
+			GD.Load<AudioStream>("res://audio/step_3.wav"),
+		};
+
+		_stepPlayer = new AudioStreamPlayer { Name = "StepPlayer", VolumeDb = -14.0f };
+		AddChild(_stepPlayer);
+
+		_stingPlayer = new AudioStreamPlayer
+		{
+			Name = "StingPlayer",
+			Stream = GD.Load<AudioStream>("res://audio/caught.wav"),
+			VolumeDb = -4.0f,
+		};
+		AddChild(_stingPlayer);
+	}
+
+	/// <summary>Footfalls paced by how fast you are actually moving.</summary>
+	private void UpdateFootsteps(double delta, bool sprinting)
+	{
+		var flat = new Vector2(Velocity.X, Velocity.Z);
+
+		if (!IsOnFloor() || flat.Length() < 0.5f)
+		{
+			// Land the next step immediately when you start moving again.
+			_stepTimer = 0.0f;
+			return;
+		}
+
+		_stepTimer -= (float)delta * (sprinting ? 1.7f : 1.0f);
+		if (_stepTimer > 0.0f)
+		{
+			return;
+		}
+
+		_stepTimer = StepInterval;
+		_stepPlayer.Stream = _steps[_stepIndex];
+		_stepIndex = (_stepIndex + 1) % _steps.Length;
+		_stepPlayer.PitchScale = (float)GD.RandRange(0.92, 1.08);
+		_stepPlayer.Play();
 	}
 
 	/// <summary>Restores saved gold, bypassing the spend/earn path.</summary>
 	public void LoadGold(int amount) => Gold = amount;
+
+	private bool _collapsing;
+
+	/// <summary>
+	/// Caught in the dark. You lose whatever you were carrying and the night
+	/// finishes without you — the run continues, but the trip was for nothing.
+	/// </summary>
+	public void Collapse()
+	{
+		// Several beasts can reach you on the same frame.
+		if (_collapsing)
+		{
+			return;
+		}
+
+		_collapsing = true;
+
+		GD.Print("Something takes hold of you in the dark. You wake at dawn, empty-handed.");
+		_stingPlayer?.Play();
+		Inventory.Clear();
+
+		// Wake up where you should have stayed.
+		if (GetTree().GetFirstNodeInGroup("bed") is Node3D bed)
+		{
+			GlobalPosition = bed.GlobalPosition + new Vector3(0.0f, 1.2f, 1.6f);
+			Velocity = Vector3.Zero;
+		}
+
+		GetNode<GameClock>("/root/GameClock").SleepThroughNight();
+		_collapsing = false;
+	}
 
 	public override void _UnhandledInput(InputEvent @event)
 	{
@@ -162,5 +254,7 @@ public partial class Player : CharacterBody3D
 
 		Velocity = velocity;
 		MoveAndSlide();
+
+		UpdateFootsteps(delta, sprinting);
 	}
 }

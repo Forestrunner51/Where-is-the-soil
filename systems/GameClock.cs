@@ -13,14 +13,20 @@ public partial class GameClock : Node
 	/// <summary>Emitted at sunrise, once the night's consequences have landed.</summary>
 	[Signal] public delegate void DayBrokeEventHandler(int day);
 
-	[Export] public float DayLength = 120.0f;
-	[Export] public float NightLength = 45.0f;
+	/// <summary>Short on purpose — chores shouldn't be padded with walking.</summary>
+	[Export] public float DayLength = 50.0f;
+
+	/// <summary>Long enough that staying out is a real stretch of time to survive.</summary>
+	[Export] public float NightLength = 40.0f;
 
 	public int Day { get; private set; } = 1;
 	public bool IsNight { get; private set; }
 
 	/// <summary>0 at the start of the current phase, 1 at its end.</summary>
 	public float PhaseProgress { get; private set; }
+
+	/// <summary>False in menus, so days don't tick by while nobody is farming.</summary>
+	public bool Running { get; set; }
 
 	private float _elapsed;
 
@@ -66,6 +72,11 @@ public partial class GameClock : Node
 
 	public override void _Process(double delta)
 	{
+		if (!Running)
+		{
+			return;
+		}
+
 		float length = IsNight ? NightLength : DayLength;
 		_elapsed += (float)delta;
 		PhaseProgress = Mathf.Clamp(_elapsed / length, 0.0f, 1.0f);

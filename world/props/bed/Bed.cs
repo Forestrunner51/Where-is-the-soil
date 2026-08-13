@@ -15,6 +15,10 @@ public partial class Bed : StaticBody3D, IInteractable
 	public override void _Ready()
 	{
 		AddToGroup("interactable");
+
+		// Where the player wakes up if something catches them in the dark.
+		AddToGroup("bed");
+
 		_clock = GetNode<GameClock>("/root/GameClock");
 	}
 

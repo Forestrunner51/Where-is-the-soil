@@ -11,6 +11,7 @@ public partial class PauseMenu : CanvasLayer
 	private QuitConfirm _quitConfirm;
 
 	private Button _resume;
+	private Button _saveNow;
 	private Button _settingsButton;
 	private Button _mainMenu;
 	private Button _quit;
@@ -24,11 +25,20 @@ public partial class PauseMenu : CanvasLayer
 		_quitConfirm = GetNode<QuitConfirm>("QuitConfirm");
 
 		_resume = GetNode<Button>("Panel/Layout/Resume");
+		_saveNow = GetNode<Button>("Panel/Layout/SaveNow");
 		_settingsButton = GetNode<Button>("Panel/Layout/Settings");
 		_mainMenu = GetNode<Button>("Panel/Layout/MainMenu");
 		_quit = GetNode<Button>("Panel/Layout/Quit");
 
 		_resume.Pressed += Resume;
+
+		// Autosave only fires at dawn — without this, quitting mid-day loses it.
+		_saveNow.Pressed += () =>
+		{
+			GetNode<SaveGame>("/root/SaveGame").Save(GetTree());
+			_saveNow.Text = "Saved";
+		};
+
 		_settingsButton.Pressed += () => _settings.Open();
 
 		_mainMenu.Pressed += () =>
@@ -82,6 +92,7 @@ public partial class PauseMenu : CanvasLayer
 
 	public void Pause()
 	{
+		_saveNow.Text = "Save";
 		Visible = true;
 		GetTree().Paused = true;
 		Input.MouseMode = Input.MouseModeEnum.Visible;

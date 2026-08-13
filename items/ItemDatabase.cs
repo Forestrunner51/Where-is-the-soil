@@ -39,11 +39,26 @@ public static class ItemDatabase
 		Description = "Heavier than it looks.",
 	};
 
+	/// <summary>
+	/// What a plot gives up once it has turned. Worth three clean harvests —
+	/// letting one plot rot is how you afford to feed the rest.
+	/// </summary>
+	public static readonly ItemData CorruptPotato = new()
+	{
+		Id = "corrupt_potato",
+		DisplayName = "Dark potato",
+		MaxStack = 20,
+		FeedValue = 0.0f,
+		Price = -45,
+		Description = "Heavy, and warm on one side. The butcher takes it without a word.",
+	};
+
 	private static readonly Dictionary<string, ItemData> ById = new()
 	{
 		[RawMeat.Id] = RawMeat,
 		[CuredMeat.Id] = CuredMeat,
 		[Potato.Id] = Potato,
+		[CorruptPotato.Id] = CorruptPotato,
 	};
 
 	public static ItemData Get(string id) => ById.GetValueOrDefault(id);

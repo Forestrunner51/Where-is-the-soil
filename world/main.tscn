@@ -1,12 +1,15 @@
 [gd_scene format=3 uid="uid://d4fhqtt1njvvb"]
 
-[ext_resource type="PackedScene" path="res://world/farm/farm.tscn" id="1_farm"]
+[ext_resource type="PackedScene" uid="uid://b15q686ci3qym" path="res://world/farm/farm.tscn" id="1_farm"]
 [ext_resource type="PackedScene" uid="uid://dancasqc6rtre" path="res://actors/player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://bm8081hf0ldfb" path="res://world/DayNightLight.cs" id="3_sun"]
 [ext_resource type="PackedScene" path="res://world/town/town.tscn" id="4_town"]
 [ext_resource type="PackedScene" path="res://ui/hud/hud.tscn" id="5_hud"]
 [ext_resource type="PackedScene" path="res://ui/shop/shop.tscn" id="6_shop"]
 [ext_resource type="PackedScene" path="res://ui/pause/pause.tscn" id="7_pause"]
+[ext_resource type="Script" uid="uid://bia8jfdlp2nr" path="res://world/Atmosphere.cs" id="8_atmos"]
+[ext_resource type="Script" uid="uid://bw0lxoyejnj5a" path="res://world/Ambience.cs" id="9_ambience"]
+[ext_resource type="AudioStream" uid="uid://dpm2bs8t4k3q" path="res://audio/wind_loop.wav" id="10_wind"]
 
 [sub_resource type="Sky" id="Sky_ycrbd"]
 
@@ -15,6 +18,10 @@ background_mode = 2
 sky = SubResource("Sky_ycrbd")
 ambient_light_source = 3
 ambient_light_color = Color(1, 1, 1, 1)
+fog_enabled = true
+fog_light_color = Color(0.62, 0.63, 0.66, 1)
+fog_density = 0.004
+fog_sky_affect = 0.4
 
 [node name="main" type="Node3D" unique_id=827585418]
 
@@ -31,6 +38,11 @@ script = ExtResource("3_sun")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=322901915]
 environment = SubResource("Environment_pkctj")
+script = ExtResource("8_atmos")
+
+[node name="Ambience" type="AudioStreamPlayer" parent="." unique_id=335566522]
+stream = ExtResource("10_wind")
+script = ExtResource("9_ambience")
 
 [node name="Hud" parent="." unique_id=1373194993 instance=ExtResource("5_hud")]
 

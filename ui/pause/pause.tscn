@@ -49,6 +49,9 @@ size_flags_vertical = 3
 [node name="Resume" type="Button" parent="Panel/Layout"]
 text = "Resume  [Esc]"
 
+[node name="SaveNow" type="Button" parent="Panel/Layout"]
+text = "Save"
+
 [node name="Settings" type="Button" parent="Panel/Layout"]
 text = "Settings"
 

@@ -7,6 +7,7 @@ using Godot;
 public partial class Hud : CanvasLayer
 {
 	private Label _status;
+	private Label _plots;
 	private Label _inventory;
 	private Label _prompt;
 
@@ -20,6 +21,7 @@ public partial class Hud : CanvasLayer
 	public override void _Ready()
 	{
 		_status = GetNode<Label>("Status");
+		_plots = GetNode<Label>("Plots");
 		_inventory = GetNode<Label>("Inventory");
 		_prompt = GetNode<Label>("Prompt");
 
@@ -28,6 +30,45 @@ public partial class Hud : CanvasLayer
 
 		// Without this the player never learns anyone died — it was console-only.
 		_village.VillagerConsumed += OnVillagerConsumed;
+	}
+
+	/// <summary>
+	/// One line per plot: whether it eats tonight, and how far gone it is. With
+	/// meat rationed, this is the information the whole day's decision rests on.
+	/// </summary>
+	private string PlotSummary()
+	{
+		var lines = new System.Collections.Generic.List<string> { "PLOTS" };
+		var crops = new System.Collections.Generic.List<Potato>();
+
+		foreach (Node node in GetTree().GetNodesInGroup("crop"))
+		{
+			if (node is Potato crop)
+			{
+				crops.Add(crop);
+			}
+		}
+
+		crops.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+
+		foreach (Potato crop in crops)
+		{
+			string label = crop.Name.ToString().Replace("Potato", "Plot ");
+
+			if (crop.IsAwake)
+			{
+				lines.Add($"{label}  AWAKE");
+				continue;
+			}
+
+			int filled = Mathf.RoundToInt(crop.Corruption * 6.0f);
+			string bar = new string('#', filled) + new string('.', 6 - filled);
+			string fed = crop.FedTonight ? "fed" : "---";
+
+			lines.Add($"{label}  {fed}  [{bar}]  {crop.TimesFed}/{crop.FeedingsToGrow}");
+		}
+
+		return string.Join("\n", lines);
 	}
 
 	private void OnVillagerConsumed(string villagerName, int remaining)
@@ -53,6 +94,7 @@ public partial class Hud : CanvasLayer
 		}
 
 		_inventory.Text = _player.Inventory.Summary();
+		_plots.Text = PlotSummary();
 
 		// A death notice outranks the interact prompt while it is up.
 		if (_noticeTimer > 0.0f)

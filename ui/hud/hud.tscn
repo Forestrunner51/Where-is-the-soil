@@ -11,6 +11,12 @@ offset_top = 12.0
 offset_right = 320.0
 offset_bottom = 80.0
 
+[node name="Plots" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 104.0
+offset_right = 340.0
+offset_bottom = 300.0
+
 [node name="Inventory" type="Label" parent="."]
 anchor_left = 1.0
 anchor_right = 1.0

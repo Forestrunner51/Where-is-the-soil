@@ -39,9 +39,16 @@ public partial class SaveGame : Node
 		config.SetValue("meta", "day", clock.Day);
 		config.SetValue("village", "survivors", village.SurvivorNames());
 
+		if (tree.GetFirstNodeInGroup("butcher") is Butcher butcher)
+		{
+			config.SetValue("shop", "raw", butcher.StockOf(ItemDatabase.RawMeat.Id));
+			config.SetValue("shop", "cured", butcher.StockOf(ItemDatabase.CuredMeat.Id));
+		}
+
 		if (tree.GetFirstNodeInGroup("player") is Player player)
 		{
 			config.SetValue("player", "gold", player.Gold);
+			config.SetValue("player", "position", player.GlobalPosition);
 
 			var items = new Godot.Collections.Dictionary();
 			foreach (ItemStack stack in player.Inventory.Stacks)
@@ -108,6 +115,10 @@ public partial class SaveGame : Node
 		}
 
 		player.LoadGold(_pending.GetValue("player", "gold", 0).AsInt32());
+
+		Vector3 spawn = _pending.GetValue("player", "position", player.GlobalPosition).AsVector3();
+		player.GlobalPosition = spawn;
+
 		player.Inventory.Clear();
 
 		var items = _pending.GetValue("player", "items", new Godot.Collections.Dictionary())
@@ -121,6 +132,18 @@ public partial class SaveGame : Node
 				player.Inventory.Add(item, entry.Value.AsInt32());
 			}
 		}
+	}
+
+	public void ApplyToButcher(Butcher butcher)
+	{
+		if (_pending == null)
+		{
+			return;
+		}
+
+		butcher.SetStock(
+			_pending.GetValue("shop", "raw", butcher.DailyRawMeat).AsInt32(),
+			_pending.GetValue("shop", "cured", butcher.DailyCuredMeat).AsInt32());
 	}
 
 	public void ApplyToCrop(Potato crop)

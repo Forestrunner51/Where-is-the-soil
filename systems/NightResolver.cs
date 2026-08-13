@@ -20,6 +20,12 @@ public partial class NightResolver : Node
 	/// <summary>Survive this many days with the town alive and you are done.</summary>
 	[Export] public int SurviveDays = 20;
 
+	/// <summary>The last stretch, when the field knows it is running out of time.</summary>
+	[Export] public int FinalNights = 3;
+
+	/// <summary>Extra corruption multiplier during those last nights.</summary>
+	[Export] public float FinalNightMultiplier = 1.6f;
+
 	private GameClock _clock;
 	private Village _village;
 	private GameSession _session;
@@ -57,6 +63,13 @@ public partial class NightResolver : Node
 		// Without the priest, the field turns faster.
 		float multiplier = _village.IsAlive(Village.Priest) ? 1.0f : UnblessedMultiplier;
 
+		// The last few nights bite hardest — the win is earned, not waited out.
+		if (IsFinalStretch(day))
+		{
+			multiplier *= FinalNightMultiplier;
+			GD.Print("The ground is warm tonight. It knows how little time is left.");
+		}
+
 		foreach (Potato crop in neglected)
 		{
 			crop.ResolveNight(multiplier);
@@ -91,6 +104,9 @@ public partial class NightResolver : Node
 			_session.EndGame(GameSession.Ending.Consumed);
 		}
 	}
+
+	/// <summary>True on the closing nights of the run.</summary>
+	public bool IsFinalStretch(int day) => day > SurviveDays - FinalNights;
 
 	/// <summary>Each beast forces corruption on one crop that is still a crop.</summary>
 	private void TendByBeasts(List<Potato> beasts, List<Potato> crops)

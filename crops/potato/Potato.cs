@@ -17,6 +17,14 @@ public partial class Potato : StaticBody3D, IInteractable
 	/// <summary>Extra potatoes a corrupted crop gives up. Bigger harvest, worse neighbour.</summary>
 	[Export] public int CorruptBonusYield = 2;
 
+	/// <summary>Past this much corruption the harvest comes up dark, and sells for far more.</summary>
+	[Export] public float CorruptHarvestThreshold = 0.5f;
+
+	/// <summary>Feeding after dark is worth this much more. The reason to be out there.</summary>
+	[Export] public float NightFeedBonus = 2.0f;
+
+	[Export] public string BeastScenePath = "res://actors/beast/beast.tscn";
+
 	[Export] public Color DryColor = new(0.55f, 0.42f, 0.28f);
 	[Export] public Color FedColor = new(0.35f, 0.65f, 0.25f);
 	[Export] public Color CorruptColor = new(0.35f, 0.05f, 0.12f);
@@ -24,8 +32,12 @@ public partial class Potato : StaticBody3D, IInteractable
 	private int _timesFed;
 	private MeshInstance3D _mesh;
 	private StandardMaterial3D _material;
+	/// <summary>Corruption at which the plot starts breathing audibly.</summary>
+	[Export] public float BreathThreshold = 0.5f;
+
 	private float _baseScale = 1.0f;
-	private float _pulse;
+	private GameClock _clock;
+	private AudioStreamPlayer3D _breath;
 
 	/// <summary>0 = healthy, 1 = awake.</summary>
 	public float Corruption { get; private set; }
@@ -49,10 +61,22 @@ public partial class Potato : StaticBody3D, IInteractable
 		get
 		{
 			if (IsAwake) return "";
-			if (IsFullyGrown) return "Harvest";
-			if (Corruption >= 0.66f) return "Feed me.";
-			if (Corruption >= 0.33f) return "Feed";
-			return FedTonight ? $"Fed ({_timesFed}/{FeedingsToGrow})" : $"Feed ({_timesFed}/{FeedingsToGrow})";
+
+			// Harvesting doesn't feed it, and the plot still eats tonight — say so.
+			if (IsFullyGrown)
+			{
+				string crop = Corruption >= CorruptHarvestThreshold ? "dark harvest" : "harvest";
+				return FedTonight ? $"Harvest ({crop})" : $"Harvest ({crop}), then feed again";
+			}
+
+			string bonus = _clock is { IsNight: true } ? "  [night: double]" : "";
+
+			if (Corruption >= 0.66f) return "Feed me." + bonus;
+			if (Corruption >= 0.33f) return "Feed" + bonus;
+
+			return FedTonight
+				? $"Fed ({_timesFed}/{FeedingsToGrow})"
+				: $"Feed ({_timesFed}/{FeedingsToGrow}){bonus}";
 		}
 	}
 
@@ -62,6 +86,8 @@ public partial class Potato : StaticBody3D, IInteractable
 
 		// NightResolver settles the whole field through this group.
 		AddToGroup("crop");
+
+		_clock = GetNode<GameClock>("/root/GameClock");
 
 		// FindChild searches recursively, so this still works if the mesh gets
 		// reparented out of the Area3D later.
@@ -77,7 +103,55 @@ public partial class Potato : StaticBody3D, IInteractable
 		_material = new StandardMaterial3D { AlbedoColor = DryColor };
 		_mesh.MaterialOverride = _material;
 
+		SetUpBreathing();
+
 		GetNode<SaveGame>("/root/SaveGame").ApplyToCrop(this);
+	}
+
+	/// <summary>
+	/// A corrupted plot breathes. Positional, so you can hear which row it is
+	/// coming from before you can see anything wrong.
+	/// </summary>
+	private void SetUpBreathing()
+	{
+		// Looping comes from the .import; six plots share this stream, so
+		// mutating it here would leak it and stomp the other five.
+		var stream = GD.Load<AudioStream>("res://audio/breathing_loop.wav");
+
+		_breath = new AudioStreamPlayer3D
+		{
+			Name = "Breath",
+			Stream = stream,
+			UnitSize = 6.0f,
+			MaxDistance = 18.0f,
+			VolumeDb = -80.0f,
+			Position = new Vector3(0.0f, 0.5f, 0.0f),
+		};
+
+		AddChild(_breath);
+		_breath.Play();
+	}
+
+	public override void _ExitTree()
+	{
+		// Looping playback holds the shared stream open past teardown otherwise.
+		_breath?.Stop();
+	}
+
+	public override void _Process(double delta)
+	{
+		if (_breath == null)
+		{
+			return;
+		}
+
+		// Silent below the threshold, rising to full as it turns.
+		bool audible = !IsAwake && Corruption >= BreathThreshold;
+		float target = audible
+			? Mathf.Lerp(-24.0f, -6.0f, Mathf.InverseLerp(BreathThreshold, 1.0f, Corruption))
+			: -80.0f;
+
+		_breath.VolumeDb = Mathf.MoveToward(_breath.VolumeDb, target, 30.0f * (float)delta);
 	}
 
 	public void Interact(Player player)
@@ -110,7 +184,10 @@ public partial class Potato : StaticBody3D, IInteractable
 
 		LastRefusal = null;
 		FedTonight = true;
-		Corruption = Mathf.Max(0.0f, Corruption - feed.FeedValue);
+
+		// Tending it in the dark is worth more — and far more dangerous.
+		float relief = feed.FeedValue * (_clock.IsNight ? NightFeedBonus : 1.0f);
+		Corruption = Mathf.Max(0.0f, Corruption - relief);
 
 		if (!IsFullyGrown)
 		{
@@ -127,9 +204,13 @@ public partial class Potato : StaticBody3D, IInteractable
 	/// </summary>
 	private bool Harvest(Player player)
 	{
-		// The temptation: a corrupted crop pays better.
+		// The temptation: a crop that has turned pays far better than a clean one.
 		int amount = Yield + (int)(CorruptBonusYield * Corruption);
-		int leftover = player.Inventory.Add(ItemDatabase.Potato, amount);
+		ItemData crop = Corruption >= CorruptHarvestThreshold
+			? ItemDatabase.CorruptPotato
+			: ItemDatabase.Potato;
+
+		int leftover = player.Inventory.Add(crop, amount);
 
 		if (leftover == amount)
 		{
@@ -140,7 +221,7 @@ public partial class Potato : StaticBody3D, IInteractable
 
 		LastRefusal = null;
 		_timesFed = 0;
-		GD.Print($"Harvested {amount - leftover} potato(es) from {Name}.");
+		GD.Print($"Harvested {amount - leftover} × {crop.DisplayName} from {Name}.");
 		Refresh();
 		return true;
 	}
@@ -187,6 +268,30 @@ public partial class Potato : StaticBody3D, IInteractable
 		Refresh();
 	}
 
+	/// <summary>
+	/// Puts a woken plot back in the ground. The beast is destroyed and the plot
+	/// becomes workable again — but the soil keeps half its corruption, so a
+	/// buried plot is always closer to turning than one that never did.
+	/// </summary>
+	public void Bury()
+	{
+		if (!IsAwake)
+		{
+			return;
+		}
+
+		GetParent()?.GetNodeOrNull($"{Name}Beast")?.QueueFree();
+
+		IsAwake = false;
+		Corruption = 0.5f;
+		_timesFed = 0;
+		FedTonight = false;
+		AddToGroup("interactable");
+
+		GD.Print($"{Name} is back in the ground. The soil remembers.");
+		Refresh();
+	}
+
 	/// <summary>Nothing left in town to take, so it takes what it can reach.</summary>
 	public void Starve()
 	{
@@ -201,7 +306,7 @@ public partial class Potato : StaticBody3D, IInteractable
 		FedTonight = false;
 	}
 
-	private void Awaken()
+	private void Awaken(bool announce = true)
 	{
 		if (IsAwake)
 		{
@@ -210,8 +315,35 @@ public partial class Potato : StaticBody3D, IInteractable
 
 		IsAwake = true;
 		RemoveFromGroup("interactable");
-		GD.Print($"{Name} has woken up.");
+		SpawnBeast();
+
+		if (announce)
+		{
+			GD.Print($"{Name} has woken up.");
+		}
+
 		Refresh();
+	}
+
+	/// <summary>
+	/// The crop stays as the bookkeeping half — saves and the nightly toll read
+	/// it — while the beast becomes the thing that actually moves.
+	/// </summary>
+	private void SpawnBeast()
+	{
+		var scene = GD.Load<PackedScene>(BeastScenePath);
+		if (scene == null)
+		{
+			GD.PushWarning($"{Name}: no beast scene at {BeastScenePath}.");
+			return;
+		}
+
+		Node3D beast = scene.Instantiate<Node3D>();
+		beast.Name = $"{Name}Beast";
+
+		// Same parent, so the crop's local position transfers directly.
+		beast.Position = Position;
+		GetParent().CallDeferred(Node.MethodName.AddChild, beast);
 	}
 
 	private void Refresh()
@@ -227,21 +359,12 @@ public partial class Potato : StaticBody3D, IInteractable
 		Color healthy = DryColor.Lerp(FedColor, growth);
 		_material.AlbedoColor = healthy.Lerp(CorruptColor, Corruption);
 
+		// Once it wakes, the beast is the visible half — hide the crop.
+		_mesh.Visible = !IsAwake;
+
 		// Scale the mesh, not the body — scaling a physics body upsets Jolt.
-		_baseScale = Mathf.Lerp(1.0f, 1.5f, growth) + (IsAwake ? 1.0f : Corruption * 0.4f);
+		_baseScale = Mathf.Lerp(1.0f, 1.5f, growth) + Corruption * 0.4f;
 		_mesh.Scale = Vector3.One * _baseScale;
-	}
-
-	public override void _Process(double delta)
-	{
-		// Only awake things breathe.
-		if (!IsAwake || _mesh == null)
-		{
-			return;
-		}
-
-		_pulse += (float)delta;
-		_mesh.Scale = Vector3.One * (_baseScale * (1.0f + Mathf.Sin(_pulse * 1.6f) * 0.05f));
 	}
 
 	/// <summary>Restores a crop from a save. Called before the first night.</summary>
@@ -251,10 +374,9 @@ public partial class Potato : StaticBody3D, IInteractable
 		Corruption = Mathf.Clamp(corruption, 0.0f, 1.0f);
 		FedTonight = fedTonight;
 
-		if (awake && !IsAwake)
+		if (awake)
 		{
-			IsAwake = true;
-			RemoveFromGroup("interactable");
+			Awaken(announce: false);
 		}
 
 		Refresh();
